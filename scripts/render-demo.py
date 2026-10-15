@@ -17,8 +17,8 @@ def caption_with(blocks, needle):
 
 before_blocks = (ROOT / "sample/example.srt").read_text(encoding="utf-8").split("\n\n")
 after_blocks = (ROOT / "demo/example.tidy.srt").read_text(encoding="utf-8").split("\n\n")
-before = caption_with(before_blocks, "自动字幕")
-after = caption_with(after_blocks, "自动字幕")
+before = caption_with(before_blocks, "切成四行")
+after = caption_with(after_blocks, "切成四行")
 
 image = Image.new("RGB", (1440, 760), "#f3f0e8")
 draw = ImageDraw.Draw(image)
