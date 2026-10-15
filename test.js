@@ -8,6 +8,7 @@ const {
   wrapText,
   tidySrt,
   tidyFilename,
+  normalizeOptions,
 } = require('./tidy.js');
 
 const tests = [];
@@ -139,6 +140,23 @@ test('adds the tidy suffix without duplicating the SRT extension', () => {
   assert.equal(tidyFilename('clip.srt'), 'clip.tidy.srt');
   assert.equal(tidyFilename('lesson.v2.SRT'), 'lesson.v2.tidy.srt');
   assert.equal(tidyFilename('captions'), 'captions.tidy.srt');
+});
+
+test('uses the documented defaults when options are omitted', () => {
+  assert.deepEqual(normalizeOptions(), { maxChars: 14, mergeThresholdMs: 800 });
+  const source = '1\n00:00:00,000 --> 00:00:00,300\n短句\n\n2\n00:00:00,400 --> 00:00:02,000\n接下句';
+  assert.equal(tidySrt(source).report.mergeCount, 1);
+});
+
+test('keeps options inside the supported ranges', () => {
+  assert.deepEqual(normalizeOptions({ maxChars: 1, mergeThresholdMs: 9000 }), {
+    maxChars: 4,
+    mergeThresholdMs: 3000,
+  });
+  assert.deepEqual(normalizeOptions({ maxChars: 99, mergeThresholdMs: 0 }), {
+    maxChars: 40,
+    mergeThresholdMs: 0,
+  });
 });
 
 let passed = 0;

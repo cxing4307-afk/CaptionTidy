@@ -105,16 +105,24 @@
   }
 
   function joinCueText(left, right) {
-    const a = left.replace(/\s+/gu, ' ').trim();
-    const b = right.replace(/\s+/gu, ' ').trim();
-    const needsSpace = /[A-Za-z0-9]$/u.test(a) && /^[A-Za-z0-9]/u.test(b);
-    return `${a}${needsSpace ? ' ' : ''}${b}`;
+    const leftText = left.replace(/\s+/gu, ' ').trim();
+    const rightText = right.replace(/\s+/gu, ' ').trim();
+    const needsSpace = /[A-Za-z0-9]$/u.test(leftText) && /^[A-Za-z0-9]/u.test(rightText);
+    return `${leftText}${needsSpace ? ' ' : ''}${rightText}`;
+  }
+
+  function normalizeOptions(options) {
+    const settings = options || {};
+    const requestedMax = Number(settings.maxChars);
+    const requestedMerge = Number(settings.mergeThresholdMs);
+    return {
+      maxChars: Math.min(40, Math.max(4, Number.isFinite(requestedMax) && requestedMax > 0 ? Math.floor(requestedMax) : 14)),
+      mergeThresholdMs: Math.min(3000, Math.max(0, Number.isFinite(requestedMerge) ? Math.floor(requestedMerge) : 800)),
+    };
   }
 
   function tidySrt(source, options) {
-    const settings = options || {};
-    const maxChars = Math.min(40, Math.max(1, Math.floor(Number(settings.maxChars) || 14)));
-    const mergeThresholdMs = Math.min(3000, Math.max(0, Math.floor(Number(settings.mergeThresholdMs) || 0)));
+    const { maxChars, mergeThresholdMs } = normalizeOptions(options);
     const parsed = parseSrt(source);
     const merged = [];
 
@@ -182,5 +190,5 @@
     return `${stem}.tidy.srt`;
   }
 
-  return { parseSrt, formatTimestamp, serializeSrt, wrapText, tidySrt, tidyFilename };
+  return { parseSrt, formatTimestamp, serializeSrt, wrapText, normalizeOptions, tidySrt, tidyFilename };
 });

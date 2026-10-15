@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const { tidySrt, tidyFilename, formatTimestamp } = window.CaptionTidy;
+  const { tidySrt, tidyFilename, formatTimestamp, normalizeOptions } = window.CaptionTidy;
   const fileInput = document.querySelector('#file-input');
   const dropZone = document.querySelector('#drop-zone');
   const maxCharsInput = document.querySelector('#max-chars');
@@ -12,10 +12,10 @@
   let files = [];
 
   function settings() {
-    return {
+    return normalizeOptions({
       maxChars: Number(maxCharsInput.value),
       mergeThresholdMs: Number(mergeInput.value),
-    };
+    });
   }
 
   function reportText(report) {
