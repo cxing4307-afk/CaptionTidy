@@ -177,5 +177,10 @@
     };
   }
 
-  return { parseSrt, formatTimestamp, serializeSrt, wrapText, tidySrt };
+  function tidyFilename(filename) {
+    const stem = String(filename || 'captions').replace(/\.srt$/iu, '');
+    return `${stem}.tidy.srt`;
+  }
+
+  return { parseSrt, formatTimestamp, serializeSrt, wrapText, tidySrt, tidyFilename };
 });

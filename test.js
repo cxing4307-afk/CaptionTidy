@@ -7,6 +7,7 @@ const {
   serializeSrt,
   wrapText,
   tidySrt,
+  tidyFilename,
 } = require('./tidy.js');
 
 const tests = [];
@@ -132,6 +133,12 @@ test('reports wrapping, overflow, and malformed blocks', () => {
     skippedBlockCount: 1,
   });
   assert.deepEqual(result.warnings, ['Skipped malformed block 1.']);
+});
+
+test('adds the tidy suffix without duplicating the SRT extension', () => {
+  assert.equal(tidyFilename('clip.srt'), 'clip.tidy.srt');
+  assert.equal(tidyFilename('lesson.v2.SRT'), 'lesson.v2.tidy.srt');
+  assert.equal(tidyFilename('captions'), 'captions.tidy.srt');
 });
 
 let passed = 0;
