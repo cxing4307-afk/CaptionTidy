@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>CaptionTidy — 竖屏字幕整理</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="CaptionTidy 首页">Caption<span>Tidy</span></a>
+    <p class="privacy-note">本地处理 · 不上传</p>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="page-title">
+      <p class="eyebrow">SRT CLEANUP FOR VERTICAL VIDEO</p>
+      <h1 id="page-title">把挤成一团的字幕，<br>整理成两行。</h1>
+      <p class="intro">选择已有的 SRT。CaptionTidy 会优先在中文标点处断行，合并一闪而过的短句，然后把结果留在你的浏览器里。</p>
+    </section>
+
+    <section class="workspace" aria-label="字幕整理工作区">
+      <div class="toolbar">
+        <label class="file-picker" id="drop-zone">
+          <input id="file-input" type="file" accept=".srt,application/x-subrip,text/plain" multiple>
+          <span class="picker-main">选择或拖入 SRT</span>
+          <span class="picker-sub">可一次选择多个 UTF-8 文件</span>
+        </label>
+
+        <div class="settings" aria-label="整理设置">
+          <label>
+            <span>每行最多</span>
+            <span class="number-field"><input id="max-chars" type="number" min="4" max="40" value="14"> 字</span>
+          </label>
+          <label>
+            <span>合并短于</span>
+            <span class="number-field"><input id="merge-threshold" type="number" min="0" max="3000" step="100" value="800"> ms</span>
+          </label>
+        </div>
+
+        <button class="primary-button" id="export-all" type="button" disabled>导出全部</button>
+      </div>
+
+      <p id="status" class="status" role="status">还没有文件。可以先试试 <code>sample/example.srt</code>。</p>
+      <div id="results" class="results" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>CaptionTidy 只整理你有权处理的本地字幕。页面没有网络请求。</p>
+  </footer>
+
+  <script src="tidy.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
