@@ -66,5 +66,43 @@
     )).join('\n\n') + '\n';
   }
 
-  return { parseSrt, formatTimestamp, serializeSrt };
+  function wrapText(text, maxChars) {
+    const limit = Math.max(1, Math.floor(Number(maxChars) || 1));
+    const normalized = String(text ?? '').replace(/\s+/gu, ' ').trim();
+    const chars = Array.from(normalized);
+
+    if (chars.length <= limit) {
+      return { text: normalized, breakCount: 0, overLimit: false };
+    }
+
+    let splitAt = -1;
+    const punctuation = /[，。！？；：、,.!?;:]/u;
+    for (let index = Math.min(limit, chars.length) - 1; index >= 0; index -= 1) {
+      if (punctuation.test(chars[index])) {
+        splitAt = index + 1;
+        break;
+      }
+    }
+
+    if (splitAt < 1) {
+      for (let index = Math.min(limit, chars.length - 1); index >= 0; index -= 1) {
+        if (/\s/u.test(chars[index])) {
+          splitAt = index;
+          break;
+        }
+      }
+    }
+
+    if (splitAt < 1) splitAt = Math.min(limit, chars.length);
+
+    const first = chars.slice(0, splitAt).join('').trimEnd();
+    const second = chars.slice(splitAt).join('').trimStart();
+    return {
+      text: `${first}\n${second}`,
+      breakCount: 1,
+      overLimit: Array.from(second).length > limit,
+    };
+  }
+
+  return { parseSrt, formatTimestamp, serializeSrt, wrapText };
 });
