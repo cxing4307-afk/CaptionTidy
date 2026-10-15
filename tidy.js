@@ -104,5 +104,78 @@
     };
   }
 
-  return { parseSrt, formatTimestamp, serializeSrt, wrapText };
+  function joinCueText(left, right) {
+    const a = left.replace(/\s+/gu, ' ').trim();
+    const b = right.replace(/\s+/gu, ' ').trim();
+    const needsSpace = /[A-Za-z0-9]$/u.test(a) && /^[A-Za-z0-9]/u.test(b);
+    return `${a}${needsSpace ? ' ' : ''}${b}`;
+  }
+
+  function tidySrt(source, options) {
+    const settings = options || {};
+    const maxChars = Math.min(40, Math.max(1, Math.floor(Number(settings.maxChars) || 14)));
+    const mergeThresholdMs = Math.min(3000, Math.max(0, Math.floor(Number(settings.mergeThresholdMs) || 0)));
+    const parsed = parseSrt(source);
+    const merged = [];
+
+    for (const cue of parsed.cues) {
+      const current = {
+        startMs: cue.startMs,
+        endMs: cue.endMs,
+        text: cue.text,
+        sourceTexts: [cue.text],
+      };
+      const previous = merged[merged.length - 1];
+
+      if (previous && mergeThresholdMs > 0) {
+        const previousDuration = previous.endMs - previous.startMs;
+        const gap = Math.max(0, current.startMs - previous.endMs);
+        if (previousDuration < mergeThresholdMs && gap <= mergeThresholdMs) {
+          previous.endMs = Math.max(previous.endMs, current.endMs);
+          previous.text = joinCueText(previous.text, current.text);
+          previous.sourceTexts.push(current.text);
+          continue;
+        }
+      }
+
+      merged.push(current);
+    }
+
+    let changedCueCount = 0;
+    let lineBreakCount = 0;
+    let overLimitCount = 0;
+    const cues = merged.map((cue) => {
+      const wrapped = wrapText(cue.text, maxChars);
+      const changed = cue.sourceTexts.length > 1 || wrapped.text !== cue.text.replace(/\s+/gu, ' ').trim();
+      if (changed) changedCueCount += 1;
+      lineBreakCount += wrapped.breakCount;
+      if (wrapped.overLimit) overLimitCount += 1;
+      return {
+        startMs: cue.startMs,
+        endMs: cue.endMs,
+        beforeText: cue.sourceTexts.join('\n'),
+        text: wrapped.text,
+        changed,
+        overLimit: wrapped.overLimit,
+      };
+    });
+
+    const outputCues = cues.map(({ startMs, endMs, text }) => ({ startMs, endMs, text }));
+    return {
+      srt: serializeSrt(outputCues),
+      cues,
+      warnings: parsed.warnings,
+      report: {
+        sourceCueCount: parsed.cues.length,
+        outputCueCount: cues.length,
+        changedCueCount,
+        mergeCount: parsed.cues.length - cues.length,
+        lineBreakCount,
+        overLimitCount,
+        skippedBlockCount: parsed.warnings.length,
+      },
+    };
+  }
+
+  return { parseSrt, formatTimestamp, serializeSrt, wrapText, tidySrt };
 });
